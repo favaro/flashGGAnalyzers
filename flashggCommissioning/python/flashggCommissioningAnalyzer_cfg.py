@@ -22,22 +22,8 @@ process.source = cms.Source("PoolSource", fileNames = readFiles)
 
 #**************************************************************
 
-process.flashggPhotons = cms.EDProducer('FlashggPhotonProducer',
-                                        PhotonTag=cms.untracked.InputTag('slimmedPhotons'),
-                                        PFCandidatesTag=cms.untracked.InputTag('packedPFCandidates'), # Needed to compute ChargedPFIso for Run1 Legacy preselection
-#                                        PhotonPreselectorName=cms.string("FlashggNoPhotonPreselector"),
-                                        PhotonPreselectorName=cms.string("FlashggLegacyPhotonPreselector"),
-                                        reducedBarrelRecHitCollection=cms.InputTag('reducedEgamma','reducedEBRecHits'),
-                                        reducedEndcapRecHitCollection=cms.InputTag('reducedEgamma','reducedEERecHits'),
-                                        reducedPreshowerRecHitCollection=cms.InputTag('reducedEgamma','reducedESRecHits')
-                                        )
-process.flashggDiPhotons = cms.EDProducer('FlashggDiPhotonProducer',
-                                          PhotonTag=cms.untracked.InputTag('flashggPhotons'),
-                                          VertexTag=cms.untracked.InputTag('offlineSlimmedPrimaryVertices'),
-#                                         VertexSelectorName=cms.string("FlashggZerothVertexSelector"),
-                                          VertexSelectorName=cms.string("FlashggLegacyVertexSelector")
-                                          )
-
+process.load("flashgg/MicroAODProducers/flashggPhotons_cfi")
+process.load("flashgg/MicroAODProducers/flashggDiPhotons_cfi")
 
 process.commissioning = cms.EDAnalyzer('flashggCommissioning',
                                        PhotonTag=cms.untracked.InputTag('flashggPhotons')

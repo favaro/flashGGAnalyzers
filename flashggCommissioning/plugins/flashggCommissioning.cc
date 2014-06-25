@@ -54,9 +54,16 @@ struct photonInfo {
 
   float pt;
   float eta;
-
-  // add photon ID variables here...
-
+  float phi;
+  float energy;
+  float e1x5;
+  float e2x5;
+  float e3x3;
+  float e5x5;
+  float sigmaIetaIeta;
+  float sigmaEtaEta;
+  float maxEnergyXtal;
+  
 
 };
 
@@ -156,7 +163,16 @@ flashggCommissioning::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     // cout << " photon pt = " << phoPtr->pt() << endl;
 
     phoInfo.pt =  phoPtr->pt();
-    cout <<  phoInfo.pt << endl;
+    phoInfo.eta    = phoPtr->eta();
+    phoInfo.phi    = phoPtr->phi();
+    phoInfo.energy = phoPtr->energy();
+    phoInfo.e1x5   = phoPtr->e1x5();
+    phoInfo.e2x5   = phoPtr->e2x5();
+    phoInfo.e3x3   = phoPtr->e3x3();
+    phoInfo.e5x5   = phoPtr->e5x5();
+    phoInfo.sigmaIetaIeta = phoPtr->sigmaIetaIeta();
+    phoInfo.sigmaEtaEta   = phoPtr->sigmaEtaEta();
+    phoInfo.maxEnergyXtal = phoPtr->maxEnergyXtal();
 
 
 
@@ -172,8 +188,7 @@ void
 flashggCommissioning::beginJob()
 {
   photonTree = fs_->make<TTree>("photonTree","per-photon tree");
-  photonTree->Branch("photonBranch",&phoInfo.pt,"phoPt/F:phoEta/F");
-
+    photonTree->Branch("photonBranch",&phoInfo.pt,"phoPt/F:phoEta/F:phoPhi/F:phoE/F:phoE1x5/F:phoE2x5/F:phoE3x3/F:phoE5x5/F:phoSigmaIEtaIEta/F:phoSigmaEtaEta/F:phoEmax/F");
 }
 
 void 
@@ -187,6 +202,15 @@ flashggCommissioning::initEventStructure()
   
   phoInfo.pt  = -999;
   phoInfo.eta = -999;
+  phoInfo.phi = -999;
+  phoInfo.energy = -999;
+  phoInfo.e1x5 = -999;
+  phoInfo.e2x5 = -999;
+  phoInfo.e3x3 = -999;
+  phoInfo.e5x5 = -999;
+  phoInfo.sigmaIetaIeta = -999;
+  phoInfo.sigmaEtaEta = -999;
+  phoInfo.maxEnergyXtal = -999;
 
 }
 

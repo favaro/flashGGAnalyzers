@@ -95,8 +95,9 @@ class flashggCommissioning : public edm::EDAnalyzer {
       void initEventStructure();
 
   
-      edm::EDGetTokenT<edm::View<flashgg::Photon> > photonToken_;
-      edm::EDGetTokenT<edm::View<reco::Vertex> >    vertexToken_; 
+      edm::EDGetTokenT<edm::View<flashgg::Photon> >            photonToken_;
+      edm::EDGetTokenT<edm::View<flashgg::DiPhotonCandidate> > diphotonToken_;
+      edm::EDGetTokenT<edm::View<reco::Vertex> >               vertexToken_; 
 
       TTree* photonTree; 
       photonInfo phoInfo;
@@ -122,7 +123,8 @@ class flashggCommissioning : public edm::EDAnalyzer {
 // constructors and destructor
 //
 flashggCommissioning::flashggCommissioning(const edm::ParameterSet& iConfig):
-  photonToken_(consumes<View<flashgg::Photon> >(iConfig.getUntrackedParameter<InputTag> ("PhotonTag", InputTag("flashggPhotons"))))
+  photonToken_(consumes<View<flashgg::Photon> >(iConfig.getUntrackedParameter<InputTag> ("PhotonTag", InputTag("flashggPhotons")))),
+  diphotonToken_(consumes<View<flashgg::DiPhotonCandidate> >(iConfig.getUntrackedParameter<InputTag> ("DiPhotonTag", InputTag("flashggDiPhotons"))))
 {
  
 }
@@ -147,11 +149,17 @@ flashggCommissioning::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   Handle<View<flashgg::Photon> > photons;
   iEvent.getByToken(photonToken_,photons);
   const PtrVector<flashgg::Photon>& photonPointers = photons->ptrVector();
+
+  Handle<View<flashgg::DiPhotonCandidate> > diphotons;
+  iEvent.getByToken(diphotonToken_,diphotons);
+  const PtrVector<flashgg::DiPhotonCandidate>& diphotonPointers = diphotons->ptrVector();  
    
-  /*Handle<View<reco::Vertex> > primaryVertices;
+  /*
+  Handle<View<reco::Vertex> > primaryVertices;
   iEvent.getByToken(vertexToken_,primaryVertices);
   const PtrVector<reco::Vertex>& pvPointers = primaryVertices->ptrVector();
   */
+
   
   // ********************************************************************************
 
@@ -174,12 +182,18 @@ flashggCommissioning::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     phoInfo.sigmaEtaEta   = phoPtr->sigmaEtaEta();
     phoInfo.maxEnergyXtal = phoPtr->maxEnergyXtal();
 
-
-
-
     photonTree->Fill();
-  }
 
+  }   // end photon loop
+
+  // ********************************************************************************
+
+  for( size_t idipho = 0; idipho < diphotonPointers.size(); idipho++ ) {
+
+    //cout << "dummy loop to shut up warnings....leadingpho_pt =  " << diphotonPointers[idipho]->leadingPhoton()->pt() << endl;
+
+  }  // end diphoton candidate loop
+  
 
 }
 

@@ -26,7 +26,8 @@ process.load("flashgg/MicroAODProducers/flashggPhotons_cfi")
 process.load("flashgg/MicroAODProducers/flashggDiPhotons_cfi")
 
 process.commissioning = cms.EDAnalyzer('flashggCommissioning',
-                                       PhotonTag=cms.untracked.InputTag('flashggPhotons')
+                                       PhotonTag=cms.untracked.InputTag('flashggPhotons'),
+                                       DiPhotonTag = cms.untracked.InputTag('flashggDiPhotons')
 )
 
 #**************************************************************

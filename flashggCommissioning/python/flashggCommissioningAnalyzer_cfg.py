@@ -16,7 +16,7 @@ process.GlobalTag.globaltag = 'POSTLS170_V5::All'
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
 
-inputlist = FileUtils.loadListFromFile('/afs/cern.ch/work/f/favaro/private/miniAODforHgg/CMSSW_7_0_4/src/flashgg/MicroAODProducers/fileList_ggToH_125_13TeV.txt')
+inputlist = FileUtils.loadListFromFile('fileList_ggToH_125_13TeV.txt')
 readFiles = cms.untracked.vstring( *inputlist)
 process.source = cms.Source("PoolSource", fileNames = readFiles)
 
@@ -24,10 +24,12 @@ process.source = cms.Source("PoolSource", fileNames = readFiles)
 
 process.load("flashgg/MicroAODProducers/flashggPhotons_cfi")
 process.load("flashgg/MicroAODProducers/flashggDiPhotons_cfi")
+process.load("flashgg/MicroAODProducers/flashggTkVtxMap_cfi")
 
 process.commissioning = cms.EDAnalyzer('flashggCommissioning',
                                        PhotonTag=cms.untracked.InputTag('flashggPhotons'),
-                                       DiPhotonTag = cms.untracked.InputTag('flashggDiPhotons')
+                                       DiPhotonTag = cms.untracked.InputTag('flashggDiPhotons'),
+                                       VertexTag=cms.untracked.InputTag('offlineSlimmedPrimaryVertices')
 )
 
 #**************************************************************
@@ -41,5 +43,5 @@ process.out = cms.OutputModule("PoolOutputModule", fileName = cms.untracked.stri
 )
 
 
-process.p = cms.Path(process.flashggPhotons*process.flashggDiPhotons*process.commissioning)
+process.p = cms.Path(process.flashggVertexMapUnique*process.flashggVertexMapNonUnique*process.flashggPhotons*process.flashggDiPhotons*process.commissioning)
 process.e = cms.EndPath(process.out)

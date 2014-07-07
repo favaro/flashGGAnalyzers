@@ -1,3 +1,4 @@
+
 // -*- C++ -*-
 //
 // Package:    MicroAODAnalyzers/flashggCommissioning
@@ -29,12 +30,16 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "DataFormats/Common/interface/Handle.h"
+#include "DataFormats/Common/interface/Ptr.h"
+#include "DataFormats/Common/interface/PtrVector.h"
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
 #include "flashgg/MicroAODAlgos/interface/VertexSelectorBase.h"
 #include "flashgg/MicroAODFormats/interface/Photon.h"
 #include "flashgg/MicroAODFormats/interface/DiPhotonCandidate.h"
+
+#include "flashgg/MicroAODAlgos/interface/PhotonIdUtils.h"
 
 #include "TTree.h"
 
@@ -93,16 +98,17 @@ class flashggCommissioning : public edm::EDAnalyzer {
       virtual void endJob() override;
 
       void initEventStructure();
-
   
       edm::EDGetTokenT<edm::View<flashgg::Photon> >            photonToken_;
       edm::EDGetTokenT<edm::View<flashgg::DiPhotonCandidate> > diphotonToken_;
       edm::EDGetTokenT<edm::View<reco::Vertex> >               vertexToken_; 
+      edm::EDGetTokenT<edm::View<pat::PackedCandidate> >       pfcandidateToken_;
 
       TTree* photonTree; 
       photonInfo phoInfo;
       // add all variables as private members
       
+      flashgg::PhotonIdUtils phou;
       
 
 
@@ -124,7 +130,9 @@ class flashggCommissioning : public edm::EDAnalyzer {
 //
 flashggCommissioning::flashggCommissioning(const edm::ParameterSet& iConfig):
   photonToken_(consumes<View<flashgg::Photon> >(iConfig.getUntrackedParameter<InputTag> ("PhotonTag", InputTag("flashggPhotons")))),
-  diphotonToken_(consumes<View<flashgg::DiPhotonCandidate> >(iConfig.getUntrackedParameter<InputTag> ("DiPhotonTag", InputTag("flashggDiPhotons"))))
+  diphotonToken_(consumes<View<flashgg::DiPhotonCandidate> >(iConfig.getUntrackedParameter<InputTag> ("DiPhotonTag", InputTag("flashggDiPhotons")))),
+  vertexToken_(consumes<View<reco::Vertex> >(iConfig.getUntrackedParameter<InputTag> ("VertexTag", InputTag("offlineSlimmedPrimaryVertices")))),
+  pfcandidateToken_(consumes<View<pat::PackedCandidate> >(iConfig.getUntrackedParameter<InputTag> ("PFCandidatesTag", InputTag("packedPFCandidates"))))
 {
  
 }
@@ -160,6 +168,11 @@ flashggCommissioning::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   const PtrVector<reco::Vertex>& pvPointers = primaryVertices->ptrVector();
   */
 
+  Handle<View<pat::PackedCandidate> > pfcandidates;
+  iEvent.getByToken(pfcandidateToken_,pfcandidates);
+  //const PtrVector<pat::PackedCandidate>& pfCandPointers = pfcandidates->ptrVector();
+
+  // cout << "size = " << pvPointers.size() << " " << pfCandPointers.size() << endl;
   
   // ********************************************************************************
 
@@ -182,7 +195,14 @@ flashggCommissioning::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     phoInfo.sigmaEtaEta   = phoPtr->sigmaEtaEta();
     phoInfo.maxEnergyXtal = phoPtr->maxEnergyXtal();
 
+
+    // cout << " isolation = " << phou.pfIsoChgWrtVtx( phoPtr, pvPointers[0], pfCandPointers, 0.3, 0.01, 0.1, 0.01 ) << endl;
+    //cout << " isolation = " << phou.pfIsoGamma( phoPtr, pfCandPointers, 0.2, 0.0, 0.070, 0.015, 0.0, 0.0, 0.0) << endl;
+    
     photonTree->Fill();
+
+  
+    
 
   }   // end photon loop
 
@@ -202,7 +222,7 @@ void
 flashggCommissioning::beginJob()
 {
   photonTree = fs_->make<TTree>("photonTree","per-photon tree");
-    photonTree->Branch("photonBranch",&phoInfo.pt,"phoPt/F:phoEta/F:phoPhi/F:phoE/F:phoE1x5/F:phoE2x5/F:phoE3x3/F:phoE5x5/F:phoSigmaIEtaIEta/F:phoSigmaEtaEta/F:phoEmax/F");
+  photonTree->Branch("photonBranch",&phoInfo.pt,"phoPt/F:phoEta/F:phoPhi/F:phoE/F:phoE1x5/F:phoE2x5/F:phoE3x3/F:phoE5x5/F:phoSigmaIEtaIEta/F:phoSigmaEtaEta/F:phoEmax/F");
 }
 
 void 
